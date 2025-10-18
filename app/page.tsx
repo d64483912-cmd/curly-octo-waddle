@@ -1,103 +1,409 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Zap, Settings, Trash2, Play, Download, Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
+
+interface Task {
+  id: string;
+  title: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  result?: string;
+}
+
+interface Agent {
+  id: string;
+  goal: string;
+  model: string;
+  status: 'idle' | 'running' | 'paused' | 'completed' | 'failed';
+  total_tasks: number;
+  completed_tasks: number;
+  created_at: string;
+}
+
+const MODELS = [
+  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+  { value: 'claude-3-haiku', label: 'Claude 3 Haiku' },
+  { value: 'mistral-medium', label: 'Mistral Medium' },
+  { value: 'gemini-pro', label: 'Gemini Pro (Free)' },
+  { value: 'llama-3-8b', label: 'Llama 3 8B (Free)' },
+];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [mounted, setMounted] = useState(false);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [defaultModel, setDefaultModel] = useState('claude-3-haiku');
+  const [showSettings, setShowSettings] = useState(false);
+  const [newGoal, setNewGoal] = useState('');
+  const [newModel, setNewModel] = useState('claude-3-haiku');
+  const { theme, setTheme } = useTheme();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Hydration fix
+  useEffect(() => {
+    setMounted(true);
+    fetchAgents();
+  }, []);
+
+  // Fetch tasks when agent is selected
+  useEffect(() => {
+    if (selectedAgent && mounted) {
+      fetchTasks(selectedAgent.id);
+    }
+  }, [selectedAgent, mounted]);
+
+  const fetchAgents = async () => {
+    try {
+      const response = await fetch('/api/agents');
+      const data = await response.json();
+      setAgents(data);
+    } catch (error) {
+      console.error('Error fetching agents:', error);
+    }
+  };
+
+  const fetchTasks = async (agentId: string) => {
+    try {
+      const response = await fetch(`/api/tasks?agentId=${agentId}`);
+      const data = await response.json();
+      setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
+
+  const createAgent = async () => {
+    if (!newGoal.trim()) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/agents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ goal: newGoal, model: newModel }),
+      });
+      const newAgent = await response.json();
+      setAgents([newAgent, ...agents]);
+      setSelectedAgent(newAgent);
+      setNewGoal('');
+      setNewModel('claude-3-haiku');
+    } catch (error) {
+      console.error('Error creating agent:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const runAgent = async () => {
+    if (!selectedAgent) return;
+
+    setLoading(true);
+    try {
+      await fetch('/api/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId: selectedAgent.id }),
+      });
+
+      // Poll for updates
+      const interval = setInterval(async () => {
+        await fetchAgents();
+        await fetchTasks(selectedAgent.id);
+      }, 1000);
+
+      setTimeout(() => clearInterval(interval), 30000);
+    } catch (error) {
+      console.error('Error running agent:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteAgent = async (agentId: string) => {
+    try {
+      await fetch(`/api/tasks?agentId=${agentId}`, { method: 'DELETE' });
+      setAgents(agents.filter(a => a.id !== agentId));
+      if (selectedAgent?.id === agentId) {
+        setSelectedAgent(null);
+        setTasks([]);
+      }
+    } catch (error) {
+      console.error('Error deleting agent:', error);
+    }
+  };
+
+  const exportResults = () => {
+    if (!selectedAgent) return;
+
+    const markdown = `# BeastMode Report
+
+## Goal
+${selectedAgent.goal}
+
+## Model
+${selectedAgent.model}
+
+## Timestamp
+${new Date(selectedAgent.created_at).toLocaleString()}
+
+## Tasks
+
+${tasks.map((task, i) => `### Task ${i + 1}: ${task.title}
+**Status:** ${task.status}
+${task.result ? `\n${task.result}` : ''}
+`).join('\n')}
+`;
+
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `beastmode-${selectedAgent.id}.md`;
+    a.click();
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-500';
+      case 'running':
+        return 'bg-blue-500 animate-pulse';
+      case 'failed':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  if (!mounted) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-black/50 backdrop-blur">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="text-2xl animate-pulse">⚡</div>
+            <h1 className="text-2xl font-bold">BeastMode</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+            >
+              <Settings size={20} />
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </header>
+
+      <div className="flex h-[calc(100vh-73px)]">
+        {/* Sidebar */}
+        <aside className="w-64 border-r border-gray-800 bg-black/30 overflow-y-auto">
+          <div className="p-4 space-y-4">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="w-full bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700">
+                  + New Agent
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-gray-900 border-gray-800">
+                <DialogHeader>
+                  <DialogTitle>Create New Agent</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Goal</label>
+                    <Textarea
+                      placeholder="What do you want BeastMode to accomplish?"
+                      value={newGoal}
+                      onChange={(e) => setNewGoal(e.target.value)}
+                      className="mt-2 bg-gray-800 border-gray-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Model</label>
+                    <Select value={newModel} onValueChange={setNewModel}>
+                      <SelectTrigger className="mt-2 bg-gray-800 border-gray-700">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        {MODELS.map(m => (
+                          <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    onClick={createAgent}
+                    disabled={loading || !newGoal.trim()}
+                    className="w-full bg-gradient-to-r from-violet-600 to-blue-600"
+                  >
+                    {loading ? 'Creating...' : 'Create Agent'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <div className="space-y-2">
+              {agents.map(agent => (
+                <div
+                  key={agent.id}
+                  onClick={() => setSelectedAgent(agent)}
+                  className={`p-3 rounded-lg cursor-pointer transition ${
+                    selectedAgent?.id === agent.id
+                      ? 'bg-violet-600/20 border border-violet-500'
+                      : 'bg-gray-800/50 hover:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{agent.goal}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {agent.completed_tasks}/{agent.total_tasks} tasks
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteAgent(agent.id);
+                      }}
+                      className="h-6 w-6"
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                  <Badge className={`mt-2 ${getStatusColor(agent.status)}`}>
+                    {agent.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto">
+          {selectedAgent ? (
+            <div className="p-8 space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold mb-2">{selectedAgent.goal}</h2>
+                <p className="text-gray-400">Model: {selectedAgent.model}</p>
+              </div>
+
+              <div className="flex gap-4">
+                <Button
+                  onClick={runAgent}
+                  disabled={loading || selectedAgent.status === 'running'}
+                  className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700"
+                >
+                  <Play size={16} className="mr-2" />
+                  {selectedAgent.status === 'running' ? 'Running...' : 'Run Agent'}
+                </Button>
+                <Button
+                  onClick={exportResults}
+                  variant="outline"
+                  className="border-gray-700"
+                >
+                  <Download size={16} className="mr-2" />
+                  Export
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">Tasks</h3>
+                {tasks.map((task, i) => (
+                  <Card key={task.id} className="bg-gray-900 border-gray-800 p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <p className="font-medium">{i + 1}. {task.title}</p>
+                      </div>
+                      <Badge className={getStatusColor(task.status)}>
+                        {task.status}
+                      </Badge>
+                    </div>
+                    {task.result && (
+                      <div className="bg-gray-800/50 rounded p-3 text-sm text-gray-300 max-h-48 overflow-y-auto">
+                        {task.result}
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="text-6xl mb-4 animate-pulse">⚡</div>
+                <h2 className="text-2xl font-bold mb-2">Welcome to BeastMode</h2>
+                <p className="text-gray-400">Create a new agent to get started</p>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="bg-gray-900 border-gray-800">
+          <DialogHeader>
+            <DialogTitle>Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">OpenRouter API Key</label>
+              <Input
+                type="password"
+                placeholder="Enter your API key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="mt-2 bg-gray-800 border-gray-700"
+              />
+              <p className="text-xs text-gray-400 mt-2">
+                Get your key at <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">openrouter.ai</a>
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Default Model</label>
+              <Select value={defaultModel} onValueChange={setDefaultModel}>
+                <SelectTrigger className="mt-2 bg-gray-800 border-gray-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  {MODELS.map(m => (
+                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={() => setShowSettings(false)} className="w-full">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

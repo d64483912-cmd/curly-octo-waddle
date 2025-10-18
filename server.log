@@ -1,0 +1,234 @@
+$ next dev --turbopack
+ ⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://169.254.0.21:3001
+
+ ✓ Starting...
+ ✓ Ready in 1740ms
+ ○ Compiling / ...
+ ✓ Compiled / in 6.2s
+ GET / 200 in 6951ms
+ ⚠ Cross origin request detected from beastmode.lindy.site to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1055ms
+ GET /favicon.ico?favicon.bf3c9292.ico 200 in 1388ms
+Error fetching agents: error: relation "agents" does not exist
+    at async GET (app/api/agents/route.ts:6:20)
+  4 | export async function GET() {
+  5 |   try {
+> 6 |     const result = await pool.query(`
+    |                    ^
+  7 |       SELECT a.*, 
+  8 |         COUNT(t.id) as total_tasks,
+  9 |         SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_tasks {
+  length: 106,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '151',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1381',
+  routine: 'parserOpenTable'
+}
+ GET /api/agents 500 in 1688ms
+ GET /favicon.ico?favicon.bf3c9292.ico 200 in 588ms
+Error fetching agents: error: relation "agents" does not exist
+    at async GET (app/api/agents/route.ts:6:20)
+  4 | export async function GET() {
+  5 |   try {
+> 6 |     const result = await pool.query(`
+    |                    ^
+  7 |       SELECT a.*, 
+  8 |         COUNT(t.id) as total_tasks,
+  9 |         SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_tasks {
+  length: 106,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '151',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1381',
+  routine: 'parserOpenTable'
+}
+ GET /api/agents 500 in 419ms
+ GET /favicon.ico 200 in 430ms
+ ✓ Compiled in 344ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET / 200 in 328ms
+ GET /favicon.ico?favicon.bf3c9292.ico 200 in 379ms
+ GET /api/agents 200 in 377ms
+ GET / 200 in 130ms
+ GET /favicon.ico?favicon.bf3c9292.ico 200 in 310ms
+ GET /api/agents 200 in 329ms
+ POST /api/agents 200 in 426ms
+ ✓ Compiled /api/tasks in 211ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 479ms
+ ✓ Compiled /api/execute in 189ms
+Error executing agent: TypeError: Cannot read properties of undefined (reading '0')
+    at POST (app/api/execute/route.ts:56:45)
+  54 |
+  55 |         const executionData = await executionResponse.json();
+> 56 |         const result = executionData.choices[0].message.content;
+     |                                             ^
+  57 |
+  58 |         // Update task with result
+  59 |         await client.query(
+ POST /api/execute 500 in 776ms
+ GET /api/agents 200 in 275ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 272ms
+ GET /api/agents 200 in 270ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 263ms
+ GET /api/agents 200 in 259ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 276ms
+ GET /api/agents 200 in 259ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 266ms
+ GET /api/agents 200 in 261ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 268ms
+ GET /api/agents 200 in 262ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 266ms
+ GET /api/agents 200 in 257ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 262ms
+ GET /api/agents 200 in 260ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 265ms
+ GET /api/agents 200 in 252ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 255ms
+ GET /api/agents 200 in 272ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 265ms
+ GET /api/agents 200 in 272ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 277ms
+ GET /api/agents 200 in 258ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 259ms
+ GET /api/agents 200 in 277ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 275ms
+ GET /api/agents 200 in 264ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 302ms
+ GET /api/agents 200 in 258ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 262ms
+ GET /api/agents 200 in 253ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 264ms
+ GET /api/agents 200 in 255ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 253ms
+ GET /api/agents 200 in 269ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 256ms
+ GET /api/agents 200 in 263ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 266ms
+ GET /api/agents 200 in 257ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 257ms
+ GET /api/agents 200 in 270ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 261ms
+ GET /api/agents 200 in 258ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 256ms
+ GET /api/agents 200 in 262ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 257ms
+ GET /api/agents 200 in 267ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 261ms
+ GET /api/agents 200 in 266ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 258ms
+ GET /api/agents 200 in 263ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 257ms
+ GET /api/agents 200 in 259ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 316ms
+ GET /api/agents 200 in 265ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 261ms
+ GET /api/agents 200 in 259ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 268ms
+ GET /api/agents 200 in 256ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 256ms
+ GET / 200 in 193ms
+ GET /favicon.ico?favicon.bf3c9292.ico 200 in 336ms
+ GET /api/agents 200 in 363ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 305ms
+ GET / 200 in 128ms
+ GET / 200 in 172ms
+ GET /favicon.ico?favicon.bf3c9292.ico 200 in 269ms
+ GET /api/agents 200 in 311ms
+ GET /api/tasks?agentId=c78b2be5-8244-4ed5-8134-a6ace928da14 200 in 283ms
+ GET / 200 in 753ms
+ GET /api/agents 200 in 313ms
+ POST /api/agents 200 in 614ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 299ms
+ POST /api/execute 200 in 386ms
+ GET /api/agents 200 in 285ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 283ms
+ GET /api/agents 200 in 274ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 293ms
+ GET /api/agents 200 in 271ms
+ GET /api/agents 200 in 296ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 320ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 300ms
+ GET /api/agents 200 in 288ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 605ms
+ GET /api/agents 200 in 508ms
+ GET /api/agents 200 in 262ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 268ms
+ GET /api/agents 200 in 264ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 273ms
+ GET /api/agents 200 in 264ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 263ms
+ GET /api/agents 200 in 270ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 252ms
+ GET /api/agents 200 in 281ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 278ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 258ms
+ GET /api/agents 200 in 253ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 267ms
+ GET /api/agents 200 in 258ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 259ms
+ GET /api/agents 200 in 273ms
+ GET /api/agents 200 in 285ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 285ms
+ GET /api/agents 200 in 295ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 308ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 253ms
+ GET /api/agents 200 in 271ms
+ GET /api/agents 200 in 256ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 257ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 267ms
+ GET /api/agents 200 in 261ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 259ms
+ GET /api/agents 200 in 277ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 260ms
+ GET /api/agents 200 in 263ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 275ms
+ GET /api/agents 200 in 262ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 257ms
+ GET /api/agents 200 in 257ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 259ms
+ GET /api/agents 200 in 262ms
+ GET /api/agents 200 in 271ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 273ms
+ GET /api/agents 200 in 255ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 265ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 257ms
+ GET /api/agents 200 in 261ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 269ms
+ GET /api/agents 200 in 271ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 257ms
+ GET /api/agents 200 in 254ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 267ms
+ GET /api/agents 200 in 264ms
+ GET /api/tasks?agentId=7e0dc890-dfeb-4f5e-ac0a-50fc71bcf1ac 200 in 266ms
+ GET / 200 in 158ms
+ GET / 200 in 150ms
+ GET / 200 in 148ms
+ GET /api/agents 200 in 288ms
